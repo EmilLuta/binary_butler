@@ -40,9 +40,12 @@ impl Config {
         }
     }
 
-    pub fn new() -> Result<Config, ConfigError> {
-        let config_file = Config::get_config_path();
-        let file_contents = fs::read_to_string(config_file)?;
+    pub fn new(config_path: Option<&str>) -> Result<Config, ConfigError> {
+        let config_file = match config_path {
+            Some(path) => path.to_string(),
+            None => Config::get_config_path(),
+        };
+        let file_contents = fs::read_to_string(config_file).unwrap();
         let mut config: Config = toml::from_str(&file_contents).unwrap();
         config.sweep_directory = shellexpand::full(&config.sweep_directory)
             .unwrap()
