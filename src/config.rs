@@ -6,7 +6,7 @@ use std::path::Path;
 use std::{error, fmt};
 use toml;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Config {
     pub sweep_directory: String,
     pub log_directory: String,
@@ -45,7 +45,8 @@ impl Config {
             Some(path) => path.to_string(),
             None => Config::get_config_path(),
         };
-        let file_contents = fs::read_to_string(config_file).unwrap();
+        log::debug!("Using config_file path: {:#?}", config_file);
+        let file_contents = fs::read_to_string(&config_file).unwrap();
         let mut config: Config = toml::from_str(&file_contents).unwrap();
         config.sweep_directory = shellexpand::full(&config.sweep_directory)
             .unwrap()
@@ -53,6 +54,16 @@ impl Config {
         config.log_directory = shellexpand::full(&config.log_directory)
             .unwrap()
             .to_string();
+        if !Path::new(&config.sweep_directory).exists() {
+            panic!(
+                "There's no file sweep_directory: {}",
+                config.sweep_directory
+            );
+        }
+        if !Path::new(&config.log_directory).exists() {
+            panic!("There's no file log_directory: {}", config.log_directory);
+        }
+        log::debug!("Config loaded: {:#?}", config);
         Ok(config)
     }
 }
