@@ -9,7 +9,6 @@ use toml;
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub sweep_directory: String,
-    pub log_directory: String,
     pub interval_seconds: u64,
     pub ttl_seconds: u64,
 }
@@ -51,17 +50,11 @@ impl Config {
         config.sweep_directory = shellexpand::full(&config.sweep_directory)
             .unwrap()
             .to_string();
-        config.log_directory = shellexpand::full(&config.log_directory)
-            .unwrap()
-            .to_string();
         if !Path::new(&config.sweep_directory).exists() {
             panic!(
                 "There's no file sweep_directory: {}",
                 config.sweep_directory
             );
-        }
-        if !Path::new(&config.log_directory).exists() {
-            panic!("There's no file log_directory: {}", config.log_directory);
         }
         log::debug!("Config loaded: {:#?}", config);
         Ok(config)
@@ -70,7 +63,7 @@ impl Config {
 
 impl Display for Config {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Config: {{\n\tsweep_directory: {},\n\tlog_directory: {},\n\tinterval_seconds: {},\n\tttl_seconds: {}\n}}", self.sweep_directory, self.log_directory, self.interval_seconds, self.ttl_seconds)
+        write!(f, "Config: {{\n\tsweep_directory: {},\n\tinterval_seconds: {},\n\tttl_seconds: {}\n}}", self.sweep_directory, self.interval_seconds, self.ttl_seconds)
     }
 }
 
