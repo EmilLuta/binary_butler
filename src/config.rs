@@ -39,7 +39,7 @@ impl Config {
         }
     }
 
-    pub fn new(config_path: Option<&str>) -> Result<Config, ConfigError> {
+    pub fn new(config_path: Option<String>) -> Result<Config, ConfigError> {
         let config_file = match config_path {
             Some(path) => path.to_string(),
             None => Config::get_config_path(),
@@ -63,7 +63,11 @@ impl Config {
 
 impl Display for Config {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Config: {{\n\tsweep_directory: {},\n\tinterval_seconds: {},\n\tttl_seconds: {}\n}}", self.sweep_directory, self.interval_seconds, self.ttl_seconds)
+        write!(
+            f,
+            "Config: {{\n\tsweep_directory: {},\n\tinterval_seconds: {},\n\tttl_seconds: {}\n}}",
+            self.sweep_directory, self.interval_seconds, self.ttl_seconds
+        )
     }
 }
 

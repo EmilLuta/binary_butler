@@ -2,7 +2,6 @@ mod config;
 mod runner;
 use simple_logger::SimpleLogger;
 
-use crate::config::Config;
 use crate::runner::Runner;
 
 use log;
@@ -13,20 +12,19 @@ static USAGE: &str = "Invalid arguments. You need to run `binary_butler --config
 fn main() {
     SimpleLogger::new().init().unwrap();
     let args: Vec<String> = env::args().collect();
-    let config = match args.len() {
-        1 => Config::new(None).unwrap(),
+    let runner = match args.len() {
+        1 => Runner::new(None),
         3 => {
             if &args[1] != "--config_path" {
                 log::error!("{}", USAGE);
                 return;
             }
-            Config::new(Some(&args[2])).unwrap()
+            Runner::new(Some(String::from(&args[2])))
         }
         _ => {
             log::error!("{}", USAGE);
             return;
         }
     };
-    let runner: Runner = Runner::new(config);
     runner.run()
 }

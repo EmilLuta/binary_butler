@@ -7,18 +7,20 @@ use std::{fs, thread, time};
 use walkdir::WalkDir;
 
 pub struct Runner {
-    config: Config,
+    config_path: Option<String>,
 }
 
 impl Runner {
-    pub fn new(config: Config) -> Runner {
-        Runner { config }
+    pub fn new(config: Option<String>) -> Runner {
+        Runner {
+            config_path: config,
+        }
     }
 
-    fn sweep(&self) -> Result<i64, Error> {
-        let ttl_duration = Duration::new(self.config.ttl_seconds, 0);
+    fn sweep(&self, config: &Config) -> Result<i64, Error> {
+        let ttl_duration = Duration::new(config.ttl_seconds, 0);
         let mut files_removed: i64 = 0;
-        for entry in WalkDir::new(&self.config.sweep_directory)
+        for entry in WalkDir::new(&config.sweep_directory)
             .into_iter()
             // TODO: Maybe log some errors if we have errors?
             .filter_map(Result::ok)
@@ -46,15 +48,14 @@ impl Runner {
     }
     pub fn run(&self) {
         loop {
-            match self.sweep() {
+            let config: Config = Config::new(self.config_path.clone()).unwrap();
+            match self.sweep(&config) {
                 Ok(files_removed) => {
                     log::info!("Removed {} files", files_removed);
                 }
                 Err(e) => panic!("{}", e.to_string()),
             }
-            thread::sleep(time::Duration::from_millis(
-                self.config.interval_seconds * 1000,
-            ));
+            thread::sleep(time::Duration::from_millis(config.interval_seconds * 1000));
         }
     }
 }
